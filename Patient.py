@@ -14,9 +14,9 @@ class Sick:
 class Patient:
     patient_id : str = ""
     patient_name : str = ""
-    address : Address = Address()
-    allergics : str = []
-    histories : Sick = []
+    address : Address = None
+    allergics : list[str] = []
+    histories : list[Sick] = []
 
     def __init__(self, patient_id, patient_name, address, allergics, histories) -> None:
         self.patient_id = patient_id
@@ -30,6 +30,6 @@ class Patient:
               f"Patient ID  : {self.patient_id}\n\
                 Patient Name: {self.patient_name}\
                 Address     : {self.address}\
-                Allergics   : {", ".join(self.allergics)}\
-                Histories   : {", ".join(self.histories)}"
+                Allergics   : {', '.join(self.allergics)}\
+                Histories   : {', '.join(self.histories)}"
         )

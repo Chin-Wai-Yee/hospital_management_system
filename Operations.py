@@ -1,5 +1,11 @@
 from Patient import *
 
 def addPatient(patients : list[Patient]):
-    for patient in patients:
-        print(patient)
+    pass
+
+def editPatient(patients : list[Patient]):
+    pass
+
+def deletePatient(patients : list[Patient]):
+    pass
+

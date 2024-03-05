@@ -1,11 +1,6 @@
-from Patient import *
+from enum import Enum
 
-def addPatient(patients : list[Patient]):
-    pass
-
-def editPatient(patients : list[Patient]):
-    pass
-
-def deletePatient(patients : list[Patient]):
-    pass
-
+class Status(Enum):
+    LOOP = -1
+    EXIT = 0
+    PROCEED = 1

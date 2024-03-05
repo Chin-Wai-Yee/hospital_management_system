@@ -1,5 +1,6 @@
-import os
 from Patient import *
+from PatientOperations import *
+from ScreenHandle import *
 
 def menu() -> bool:
 
@@ -22,13 +23,13 @@ def menu() -> bool:
     match option:
         # Create patient
         case "1":
-            pass
+            addPatient(patients)
         # Edit patient
         case "2":
-            pass
+            editPatient(patients)
         # Delete patient
         case "3":
-            pass
+            deletePatient(patients)
         # Add appointment
         case "4":
             pass
@@ -53,5 +54,5 @@ def menu() -> bool:
 if __name__ == "__main__":
     patients : list[Patient] = []
     while(menu()):
-        os.system("pause")
-        os.system("cls")
+        pause()
+        cls()

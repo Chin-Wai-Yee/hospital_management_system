@@ -1,30 +1,19 @@
 from Patient import Patient
 from Search import findPatient
-from SickRecordOperation import addRecord
+from SickRecordOperation import sickMenu
 from ScreenHandle import *
 from Operations import Status
 
-# def onError(func, input_msg : str, error_msg : str):
-#     def wrapper(object):
-#         user_input = input(input_msg)
-#         if (user_input == "0"):
-#             return Status.EXIT
-#         if (func(user_input)) == False:
-#             alert(error_msg)
-#             return Status.LOOP
-#         return Status.PROCEED
-#     return wrapper
-
-def InputPatientID(patients : list[Patient], allow_duplicate = False) -> Status:
+def inputPatient(patients : list[Patient]):
     def wrapper(patient : Patient):
-        p_id = input("Please enter the patient's ID (0 - exit) : ")
+        print("Patient ID Format: Four characters followed by four digits")
+        print("Example: ABCD1234")
+        p_id = input("Please enter the patient's ID (0 - exit) : ").upper()
         i = findPatient(patients, p_id)
         if p_id == "0":
             return Status.EXIT
-        elif not allow_duplicate and i != -1:
+        elif i != -1:
             alert("Patient ID already exists. Please try again.")
-        elif allow_duplicate and i == -1:
-            alert("Patient ID not found. Please try again.")
         elif (patient.setId(p_id) == False):
             alert("Invalid ID. Please try again.")
             return Status.LOOP
@@ -33,18 +22,19 @@ def InputPatientID(patients : list[Patient], allow_duplicate = False) -> Status:
     
     return wrapper
 
-def InputPatientName(patient : Patient) -> Status:
+def inputPatientName(patient : Patient) -> Status:
     p_name = input("Please enter the patient's Name (0 - Exit): ")
     if p_name == "0":
         return Status.EXIT
     if (patient.setName(p_name) == False):
-        # actually won't happen
         alert("Invalid Name. Please try again.")
         return Status.LOOP
 
     return Status.PROCEED
 
-def InputPatientAddress(patient : Patient) -> Status:
+def inputPatientAddress(patient : Patient) -> Status:
+    print("Address Format: <Street>, <City>, <State>, <Zip>, <Country>")
+    print("Example: 1234 Main St, Springfield, IL, 62701, USA")
     p_addr = input("Please enter the patient's Address (0 - Exit): ")
     if p_addr == "0":
         return Status.EXIT
@@ -54,7 +44,7 @@ def InputPatientAddress(patient : Patient) -> Status:
 
     return Status.PROCEED
 
-def InputPatientAllergics(patient : Patient) -> Status:
+def inputPatientAllergics(patient : Patient) -> Status:
     p_allergics = input("Please enter the patient's Allergics (0 to stop) : ")
     if (p_allergics == "0"):
         return Status.PROCEED
@@ -62,26 +52,28 @@ def InputPatientAllergics(patient : Patient) -> Status:
         alert("Allergics existed. Please try again.")
     return Status.LOOP
 
-def InputPatientSickRecord(patient : Patient) -> Status:
-    while addRecord(patient) != Status.PROCEED:
-        pass
-    return Status.LOOP
+def inputPatientSickRecord(patient : Patient) -> Status:
+    while sickMenu(patient.histories) != Status.EXIT:
+        return Status.LOOP
+    return Status.PROCEED
 
 def addPatient(patients : list[Patient]) -> None:
+
     step = 1
     new_patient = Patient()
     functions = [
-        InputPatientID(patients),
-        InputPatientName,
-        InputPatientAddress,
-        InputPatientAllergics,
-        InputPatientSickRecord
+        inputPatient(patients),
+        inputPatientName,
+        inputPatientAddress,
+        inputPatientAllergics,
+        inputPatientSickRecord
     ]
 
     # Loop through each step
     while step <= len(functions):
         cls()
         print(new_patient)
+        print("=" * 20)
         if (status := functions[step - 1](new_patient)) == Status.EXIT:
             break
         if status == Status.PROCEED:
@@ -92,80 +84,40 @@ def addPatient(patients : list[Patient]) -> None:
         patients.append(new_patient)
 
 def editPatient(patients : list[Patient]):
-    step = 1
-    i : int
-    while step == 1:
-        p_id = input("Please enter the patient's ID to edit (0 - exit): ")
-        if p_id == "0":
-            step = -1
-        elif i := findPatient(patients, p_id) == -1:
-            print("Patient ID not found. Please try again.")
-        else:
-            step += 1
+    p_id = input("Please enter the patient's ID to edit (0 - exit): ").upper()
+    if p_id == "0":
+        return
+    i = findPatient(patients, p_id)
+    if i == -1:
+        alert("Patient ID not found. Please try again.")
+        return
+        
+    patient = patients[i]
 
-    while step == 2:
-        print("1. Edit ID")
-        print("2. Edit Name")
-        print("3. Edit Address")
-        print("4. Edit Allergics")
-        print("5. Edit History of sickness")
-        print("6. Exit")
+    while True:
+        cls()
+        print(patient)
+        print("=" * 20)
+        print("1. Edit Name")
+        print("2. Edit Address")
+        print("3. Edit Allergics")
+        print("4. Edit History of sickness")
+        print("5. Exit")
         option = input("Please enter what you want to edit : ")
         # written by copilot
         if option == "1":
-            p_id = input("Please enter the patient's ID : ")
-            if (patients[i].setId(p_id) == False):
-                print("Invalid ID. Please try again.")
-            else:
-                step += 1
+            inputPatientName(patient)
         elif option == "2":
-            p_name = input("Please enter the patient's Name : ")
-            if (patients[i].setName(p_name) == False):
-                # actually won't happen
-                print("Invalid Name. Please try again.")
-            else:
-                step += 1
+            inputPatientAddress(patient)
         elif option == "3":
-            p_addr = input("Please enter the patient's Address : ")
-            if (patients[i].setAddress(p_addr) == False):
-                print("Invalid Address. Please try again.")
-            else:
-                step += 1
+            inputPatientAllergics(patient)
         elif option == "4":
-            option = input("Enter 1 to add allergics, 2 to remove allergics : ")
-            if option == "1":
-                p_allergics = input("Please enter the patient's Allergics (0 to stop) : ")
-                if (p_allergics == "0"):
-                    step += 1
-                elif (patients[i].setAllergics(p_allergics) == False):
-                    print("Allergics existed. Please try again.")
-            elif option == "2":
-                p_allergics = input("Please enter the patient's Allergics number to remove (0 to stop) : ")
-                if (p_allergics == "0"):
-                    step += 1
-                elif (patients[i].removeAllergics(p_allergics) == False):
-                    print("Allergics not found. Please try again.")
-            else:
-                print("Invalid option. Please try again.")
+            while sickMenu(patient.histories) != Status.EXIT:
+                pass
         elif option == "5":
-            option = input("Enter 1 to add history of sickness, 2 to remove history of sickness : ")
-            if option == "1":
-                p_sick_record = input("Please enter the patient's History of sickness (0 to stop) : ")
-                if (p_sick_record == "0"):
-                    step += 1
-                elif (patients[i].setSickRecord(p_sick_record) == False):
-                    # actually won't happen
-                    print("Invalid History of sickness. Please try again.")
-            elif option == "2":
-                p_sick_record = input("Please enter the patient's History number to remove (0 to stop) :")
-                if (p_sick_record == "0"):
-                    step += 1
-                elif (patients[i].removeSickRecord(p_sick_record) == False):
-                    print("History not found. Please try again.")
-            elif option == "6":
-                step += 1
+            return
         else:
-            print("Invalid option. Please try again.")
+            alert("Invalid option. Please try again.")
 
 def deletePatient(patients : list[Patient]):
     step = 1
@@ -175,10 +127,12 @@ def deletePatient(patients : list[Patient]):
         if p_id == "0":
             step = -1
         elif i := findPatient(patients, p_id) == -1:
-            print("Patient ID not found. Please try again.")
+            alert("Patient ID not found. Please try again.")
         else:
             step += 1
     while step == 2:
+        cls()
+        print(patients[i])
         option = input("Are you sure you want to delete this patient? (Y/N) : ")
         if option == "Y":
             patients.pop(i)
@@ -186,11 +140,22 @@ def deletePatient(patients : list[Patient]):
         elif option == "N":
             step += 1
         else:
-            print("Invalid option. Please try again.")
+            alert("Invalid option. Please try again.")
 
 # Test
 if __name__ == "__main__":
-    patients : list[Patient] = []
+    patients : list[Patient] = [
+        Patient("ABCD1234", "John Doe"),
+        Patient("EFGH5678", "Jane Doe")
+    ]
+    patients[0].setAddress("123 Main St, Los Angeles, CA, 90007, USA")
+    patients[0].setAllergics("Peanuts")
+    patients[0].setAllergics("UTAR")
+    # Set diff data please
+    patients[1].setAddress("456 Main St, Los Angeles, CA, 90007, USA")
+    patients[1].setAllergics("Peanuts")
+    patients[1].setAllergics("Human")
+
     while True:
         print("1. Create new patient account")
         print("2. Edit patient account")
@@ -219,6 +184,6 @@ if __name__ == "__main__":
             print("Exiting...")
             break
         else:
-            print("Invalid option, please try again")
+            alert("Invalid option, please try again")
         pause()
         cls()

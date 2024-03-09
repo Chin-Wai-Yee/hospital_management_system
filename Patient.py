@@ -2,31 +2,32 @@ from datetime import datetime
 from Validations import idValidation, addrValidation
 
 class Address:
-    no : str = ""
     street : str = ""
     city : str = ""
     state : str = ""
     zip_code : str = ""
+    country : str = ""
 
     # Constructor
     def __init__(
-            self, no : str,
+            self,
             street : str,
             city : str,
             state : str,
-            zip_code : str) -> None:
-        self.no = no
+            zip_code : str,
+            country : str) -> None:
         self.street = street
         self.city = city
         self.state = state
         self.zip_code = zip_code
+        self.country = country
 
     # toString
     def __str__(self) -> str:
-        if self.no == "":
-            return ""
+        if self.street == "" and self.city == "" and self.state == "" and self.zip_code == "" and self.country == "":
+            return "None"
         return (
-            f"{self.no} {self.street}, {self.city}, {self.state} {self.zip_code}"
+            f"{self.street}, {self.city}, {self.state} {self.zip_code}, {self.country}"
         )
 
 class SickRecord:
@@ -39,7 +40,7 @@ class SickRecord:
     def __init__(
             self,
             name : str = "",
-            date : datetime = None,
+            date : datetime = datetime.now(),
             treatment : str = "",
             doctor : str = "") -> None:
         self.name = name
@@ -58,19 +59,22 @@ class SickRecord:
         self.name = name
         return True
 
-    def setDate(self, date : str) -> bool:
+    def setDate(self, date: str) -> bool:
         try:
-            date = datetime.strptime(date, "%Y-%m-%d")
+            self.date = datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
             return False
-        self.date = date
         return True
     
     def setTreatment(self, treatment : str) -> bool:
+        if treatment == "":
+            return False
         self.treatment = treatment
         return True
     
     def setDoctor(self, doctor : str) -> bool:
+        if doctor == "":
+            return False
         self.doctor = doctor
         return True
 
@@ -97,13 +101,21 @@ class Patient:
 
     # toString
     def __str__(self) -> str:
-        return (
+        return_str = (
             f"Patient ID   : {self.patient_id}\n"\
             f"Patient Name : {self.patient_name}\n"\
             f"Address      : {self.address}\n"\
             f"Allergics    : {', '.join(self.allergics) if self.allergics else 'None'}\n"\
-            f"Histories    : {', '.join(str(history) for history in self.histories) if self.histories else 'None'}"
         )
+
+        if self.histories:
+            return_str += "Histories    :\n"
+            for i, record in enumerate(self.histories):
+                return_str += f"{i+1}. {record}\n"
+        else:
+            return_str += "Histories    : None"
+
+        return return_str
     
     def setId(self, id : str) -> bool:
         isId = idValidation(8, 4)
@@ -114,17 +126,22 @@ class Patient:
         return True
     
     def setName(self, name : str) -> bool:
+        if name == "":
+            return False
+        
         self.patient_name = name.title()
         return True
     
     def setAddress(self, address : str) -> bool:
         if not addrValidation(address):
             return False
-        address = [a.strip() for a in address.split(",")]
-        self.address = Address(address[0], address[1], address[2], address[3], address[4])
+        addr = [a.strip() for a in address.split(",")]
+        self.address = Address(addr[0], addr[1], addr[2], addr[3], addr[4])
         return True
     
     def setAllergics(self, allergic : str) -> bool:
+        if allergic == "":
+            return False
         allergic = allergic.title()
         if allergic in self.allergics:
             return False
